@@ -11,19 +11,19 @@ class Book {
 // ui class: handle ui tasks
 class UI {
   static displayBooks() {
-    const storedBooks = [
-      {
-        title: "book one",
-        author: "john doe",
-        isbn: "3434434",
-      },
-      {
-        title: "book two",
-        author: "john doe",
-        isbn: "45545",
-      },
-    ];
-    const books = storedBooks;
+    // const storedBooks = [
+    //   {
+    //     title: "book one",
+    //     author: "john doe",
+    //     isbn: "3434434",
+    //   },
+    //   {
+    //     title: "book two",
+    //     author: "john doe",
+    //     isbn: "45545",
+    //   },
+    // ];
+    const books = Store.getBooks();
     books.forEach((book) => UI.addBookToList(book));
   }
 
@@ -68,17 +68,33 @@ class UI {
 
 // store class: handles  local storage
 class Store {
-    static getBooks(){
-
+  static getBooks() {
+    let books;
+    if (localStorage.getItem("books") === null) {
+      books = [];
+    }else{
+        books = JSON.parse(localStorage.getItem('books'))
     }
 
-    static addBook(book){
+    return books;
+  }
 
-    }
+  static addBook(book) {
+    const books = Store.getBooks();
+    books.push(book)
+    localStorage.setItem('books' , JSON.stringify(books));
+  }
 
-    static removeBook(isbn){
+  static removeBook(isbn) {
+    const books = Store.getBooks();
+    books.forEach((book, index) =>{
+        if(book.isbn === isbn){
+            books.splice(index , 1);
+        }
+    })
 
-    }
+    localStorage.setItem('books' , JSON.stringify(books));
+  }
 }
 
 // event to display books
@@ -101,6 +117,7 @@ form.addEventListener("submit", (e) => {
 
     // add book to ui
     UI.addBookToList(book);
+    Store.addBook(book);
     UI.showAlert("book added sucessfully", "success");
     UI.clearFields();
   }
@@ -110,4 +127,5 @@ form.addEventListener("submit", (e) => {
 const bookList = document.querySelector("#book-list");
 bookList.addEventListener("click", (e) => {
   UI.deleteBook(e.target);
+  Store.removeBook(e.target.parentElement.previouseElementSibling.textContent)
 });
